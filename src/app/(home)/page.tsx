@@ -64,12 +64,8 @@ export default function Home() {
   const [name, setName] = useState<string | undefined>(undefined);
   const [id, setId] = useState<string>();
 
-  type cursor_type = {
-    [key: string]: { x: number; y: number; name: string; color: string };
-  };
-
-  const [mouse, ref] = useMouse();
-  const [cursors, setCursors] = useState<cursor_type[]>([]);
+  const [mouse, ref] = useMouse<HTMLElement>();
+  const [cursors, setCursors] = useState<any>();
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
 
@@ -229,14 +225,14 @@ export default function Home() {
 
   return (
     <FullScreen handle={handle}>
-      <main className="flex min-h-screen w-screen items-center justify-center">
+      <main
+        className="flex min-h-screen w-screen items-center justify-center"
+        ref={ref}
+      >
         {contextHolder}
         {isConnected ? (
           <div className="w-full h-max flex flex-col gap-5">
-            <div
-              className="w-screen h-screen flex cursor-crosshair relative overflow-hidden items-center justify-center flex-col gap-3 "
-              ref={ref}
-            >
+            <div className="w-screen h-screen flex cursor-crosshair relative overflow-hidden items-center justify-center flex-col gap-3 ">
               <div className="header text-white/40">
                 Better You Go Fullscreen. . .
               </div>
