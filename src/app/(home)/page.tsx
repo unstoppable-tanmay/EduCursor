@@ -65,7 +65,7 @@ export default function Home() {
   const [id, setId] = useState<string>();
 
   const [mouse, ref] = useMouse<HTMLElement>();
-  const [cursors, setCursors] = useState<any>();
+  const [cursors, setCursors] = useState<any>([]);
   const [code, setCode] = useState("");
   const [language, setLanguage] = useState("javascript");
 
