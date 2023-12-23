@@ -15,6 +15,27 @@ const io = new Server(httpServer, {
   },
 });
 
+// Generate Light Colors
+function generateLightColor() {
+  while (true) {
+    // Generate random RGB values between 180 and 255
+    const r = Math.floor(Math.random() * 75) + 180;
+    const g = Math.floor(Math.random() * 75) + 180;
+    const b = Math.floor(Math.random() * 75) + 180;
+
+    // Calculate luminance using YIQ formula
+    const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+
+    // Check if luminance is high enough for contrast
+    if (luminance > 0.7) {
+      // Convert RGB values to hex string
+      const hexColor = `${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
+      return hexColor;
+    }
+  }
+}
+
+
 // The Data Stores
 var rooms = new Map()
 var user_room = new Map()
@@ -46,7 +67,7 @@ io.on("connection", (socket) => {
           x: 0,
           y: 0,
           name: data.name,
-          color: Math.floor(Math.random() * 16777215).toString(16)
+          color: generateLightColor()
         })
         // Assigned to rooms like - Map("Room Name"->member)
         rooms.set(data.room, member)
@@ -55,7 +76,7 @@ io.on("connection", (socket) => {
         user_room.set(socket.id, data.room)
 
         // setting the initial code room_name -> code
-        code.set(socket.id, "")
+        code.set(socket.id, { code: "", lang: "javascript" })
 
         // setting user to users for no duplication
         users.push(data.name)
@@ -95,7 +116,7 @@ io.on("connection", (socket) => {
             x: 0,
             y: 0,
             name: data.name,
-            color: Math.floor(Math.random() * 16777215).toString(16)
+            color: generateLightColor()
           })
 
         // set user -> room
@@ -145,10 +166,27 @@ io.on("connection", (socket) => {
     // If room is available only
     if (rooms.get(data.room)) {
       // set Code like room -> code
-      code.set(data.room, data.code)
+      code.set(data.room, { ...code.get(data.room), code: data.code })
 
       // Emit to the room users
       io.to(data.room).emit("update_code", code.get(data.room));
+    }
+    else {
+      // send error messages to the user
+      socket.emit('error', `No Room Id - ${data.room}`);
+      console.log("error", `No Room Id - ${data.room}`)
+    }
+  })
+
+  // Update Language
+  socket.on("update_lang", data => {
+    // If room is available only
+    if (rooms.get(data.room)) {
+      // set Language like room -> code
+      code.set(data.room, { ...code.get(data.room), lang: data.lang })
+
+      // Emit to the room users
+      io.to(data.room).emit("update_lang", code.get(data.room));
     }
     else {
       // send error messages to the user
